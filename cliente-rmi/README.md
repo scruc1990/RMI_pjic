@@ -1,12 +1,15 @@
 # Taller de Sistemas Distribuidos: Implementación RMI con NestJS (Cliente)
 
-Este proyecto implementa el componente **Cliente** del sistema distribuido, encargado de la captura de datos y la invocación de métodos remotos utilizando el framework NestJS y transporte TCP.
+Este proyecto implementa el componente **Cliente** del sistema distribuido, encargado de la captura de datos y la invocación de métodos remotos utilizando el framework NestJS y transporte gRPC.
 
-## 1. Diagrama de Clases (Arquitectura del Cliente)
+## Arquitectura del Cliente (Implementación gRPC)
 
-El siguiente diagrama representa la estructura del cliente, donde el `App.Controller` gestiona la entrada del usuario y el `App.Service` utiliza un **ClientProxy** para comunicarse con el servidor remoto.
+El cliente ha sido rediseñado para utilizar **gRPC** sobre **HTTP/2**, lo que permite una comunicación fuertemente tipada a través del archivo `payroll.proto`. 
 
-[Image of a UML class diagram for a NestJS client microservice showing AppController, AppService, and ClientProxy interaction]
+* **AppController**: Captura los parámetros `empleados` y `meses` desde una petición HTTP GET.
+* **AppService**: Actúa como el **Stub** de RMI. Al inicializar el módulo (`onModuleInit`), obtiene la interfaz del servicio remoto y realiza la invocación de forma transparente.
+* **ClientsModule**: Centraliza la configuración de la conexión, vinculando el paquete `payroll` con el puerto `50051`.
+
 
 ```mermaid
 classDiagram
@@ -15,13 +18,16 @@ classDiagram
         +calcular(empleados, meses)
     }
     class AppService {
-        -ClientProxy clientProxy
+        -ClientGrpc client
+        -PayrollService payrollService
+        +onModuleInit()
         +enviarSolicitudNomina(numEmpleados, numMeses)
     }
     class ClientsModule {
         <<Config>>
-        +Transport TCP
-        +Port 3001
+        +Transport GRPC
+        +Port 50051
+        +Proto payroll.proto
     }
     AppController --> AppService : solicita cálculo
-    AppService --> ClientsModule : utiliza Proxy (RMI)
+    AppService --> ClientsModule : obtiene Proxy (Stub)
