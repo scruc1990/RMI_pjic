@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package payroll;
+
+service PayrollService {
+  rpc CalcularNomina (NominaRequest) returns (NominaResponse);
+}
+
+message NominaRequest {
+  int32 empleados = 1;
+  int32 meses = 2;
+}
+
+message FilaMatriz {
+  repeated double salarios = 1;
+}
+
+message DetalleEmpleado {
+  int32 empleado = 1;
+  double total = 2;
+}
+
+message DetalleMes {
+  int32 mes = 1;
+  double promedio = 2;
+}
+
+message ResultadoData {
+  repeated DetalleEmpleado totalPorEmpleado = 1;
+  repeated DetalleMes promedioPorMes = 2;
+  double totalGeneral = 3;
+}
+
+message NominaResponse {
+  repeated FilaMatriz matrizGenerada = 1;
+  ResultadoData resultados = 2;          
+}
